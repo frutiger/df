@@ -57,10 +57,10 @@ then
   echo "Valid platforms:"
   find $dir -maxdepth 1 -type d | while read p
   do
-    platform=$(basename $p)
-    if ! [[ $platform =~ \. ]]
+    platform=$(basename "$p")
+    if ! [[ "$platform" =~ \. ]]
     then
-      echo $platform
+      echo "$platform"
     fi
   done
 
@@ -69,31 +69,48 @@ fi
 
 if [ -e $sourcedir/parent ]
 then
-  ./$0 $(cat $sourcedir/parent)
+  $(readlink -f $0) $(cat "$sourcedir"/parent)
 fi
 
-find $sourcedir -type f | while read source
+find "$sourcedir/" | while read source
 do
-  file=$(basename $source)
-  target=$targetdir/$file
-  if [ $file = "parent" ]
+  file=${source#$sourcedir/}
+
+  if [ -z "$file" ]
+  then
+    continue
+  fi
+
+  if [ "$file" = "parent" ]
     then continue
   fi
 
-  if [ -e $target ]
+  target="$targetdir/$file"
+  if [ -e "$target" ]
   then
-    if ! is_managed $file
+    if ! is_managed "$file"
     then
       echo "Error: $target is unmanaged and already exists"
       exit
-    elif is_owned $file
+    elif is_owned "$file"
     then
-      rm $target
+      if [ -d "$source" ]
+      then
+        rm -r "$target"
+      else
+        rm "$target"
+      fi
     fi
   fi
 
-  own $file
+  own "$file"
 
-  cat "$source" >> $target
+  if [ -d "$source" ]
+  then
+    mkdir -p "$target"
+  else
+    mkdir -p $(dirname "$target")
+    cat "$source" >> "$target"
+  fi
 done
 
