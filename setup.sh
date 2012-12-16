@@ -44,7 +44,12 @@ if [ $1 = "reset" ]
 then
   cat $datafile | while read line
   do
-    rm "$targetdir/$(echo $line | cut -d: -f2)"
+    file="$(echo $line | cut -d: -f2)"
+    target="$targetdir/$file"
+    if [ -e "$target" ]
+    then
+      rm -r "$target"
+    fi
   done
   rm $datafile
   exit
@@ -94,12 +99,7 @@ do
       exit
     elif is_owned "$file"
     then
-      if [ -d "$source" ]
-      then
-        rm -r "$target"
-      else
-        rm "$target"
-      fi
+      rm -r "$target"
     fi
   fi
 
