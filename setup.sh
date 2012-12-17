@@ -1,7 +1,6 @@
 #!/usr/bin/bash
 
-if [[ $# < 1 ]]
-then
+if [[ $# < 1 ]]; then
   echo "Usage: $0 [ <platform> | reset ]"
   exit
 fi
@@ -11,8 +10,7 @@ platform=$1
 sourcedir=$dir/$platform
 targetdir=~
 datafile=$targetdir/.dotfiles.data
-if [ ! -f $datafile ]
-then
+if [ ! -f $datafile ]; then
   touch $datafile
 fi
 
@@ -27,27 +25,22 @@ function is_owned() {
 }
 
 function own() {
-  if is_owned $1
-  then
+  if is_owned $1; then
     return
   fi
 
-  if is_managed $1
-  then
+  if is_managed $1; then
     return
   fi
 
   echo "$platform:$1" >> $datafile
 }
 
-if [ $1 = "reset" ]
-then
-  cat $datafile | while read line
-  do
+if [ $1 = "reset" ]; then
+  cat $datafile | while read line; do
     file="$(echo $line | cut -d: -f2)"
     target="$targetdir/$file"
-    if [ -e "$target" ]
-    then
+    if [ -e "$target" ]; then
       rm -r "$target"
     fi
   done
@@ -55,16 +48,13 @@ then
   exit
 fi
 
-if [ ! -d $sourcedir ]
-then
+if [ ! -d $sourcedir ]; then
   echo "Usage: $0 [ <platform> | reset ]"
   echo
   echo "Valid platforms:"
-  find $dir -maxdepth 1 -type d | while read p
-  do
+  find $dir -maxdepth 1 -type d | while read p; do
     platform=$(basename "$p")
-    if ! [[ "$platform" =~ \. ]]
-    then
+    if ! [[ "$platform" =~ \. ]]; then
       echo "$platform"
     fi
   done
@@ -72,41 +62,34 @@ then
   exit
 fi
 
-if [ -e $sourcedir/parent ]
-then
+if [ -e $sourcedir/parent ]; then
   $(readlink -f $0) $(cat "$sourcedir"/parent)
 fi
 
-find "$sourcedir/" | while read source
-do
+find "$sourcedir/" | while read source; do
   file=${source#$sourcedir/}
 
-  if [ -z "$file" ]
-  then
+  if [ -z "$file" ]; then
     continue
   fi
 
-  if [ "$file" = "parent" ]
-    then continue
+  if [ "$file" = "parent" ]; then
+    continue
   fi
 
   target="$targetdir/$file"
-  if [ -e "$target" ]
-  then
-    if ! is_managed "$file"
-    then
+  if [ -e "$target" ]; then
+    if ! is_managed "$file"; then
       echo "Error: $target is unmanaged and already exists"
       exit
-    elif is_owned "$file"
-    then
+    elif is_owned "$file"; then
       rm -r "$target"
     fi
   fi
 
   own "$file"
 
-  if [ -d "$source" ]
-  then
+  if [ -d "$source" ]; then
     mkdir -p "$target"
   else
     mkdir -p $(dirname "$target")
