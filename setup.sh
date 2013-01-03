@@ -67,7 +67,9 @@ if [ ! -d $sourcedir ]; then
 fi
 
 if [ -e $sourcedir/parent ]; then
-    $(readlink -f $0) $(cat "$sourcedir"/parent)
+    if ! $(readlink -f $0) $(cat "$sourcedir"/parent); then
+        exit
+    fi
 fi
 
 find "$sourcedir/" | while read source; do
@@ -86,7 +88,7 @@ find "$sourcedir/" | while read source; do
         if ! is_managed "$file"; then
             echo "Error: $target is unmanaged and already exists"
             reset
-            exit
+            exit -1
         elif is_owned "$file"; then
             rm -r "$target"
         fi
