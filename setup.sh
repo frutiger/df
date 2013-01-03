@@ -36,7 +36,7 @@ function own() {
     echo "$platform:$1" >> $datafile
 }
 
-if [ $1 = "reset" ]; then
+function reset() {
     cat $datafile | while read line; do
         file="$(echo $line | cut -d: -f2)"
         target="$targetdir/$file"
@@ -45,6 +45,10 @@ if [ $1 = "reset" ]; then
         fi
     done
     rm $datafile
+}
+
+if [ $1 = "reset" ]; then
+    reset
     exit
 fi
 
@@ -81,6 +85,7 @@ find "$sourcedir/" | while read source; do
     if [ -e "$target" ]; then
         if ! is_managed "$file"; then
             echo "Error: $target is unmanaged and already exists"
+            reset
             exit
         elif is_owned "$file"; then
             rm -r "$target"
