@@ -66,10 +66,12 @@ if [ ! -d $sourcedir ]; then
     exit
 fi
 
-if [ -e $sourcedir/parent ]; then
-    if ! $(readlink -f $0) $(cat "$sourcedir"/parent); then
-        exit
-    fi
+if [ -e $sourcedir/parents ]; then
+    cat "$sourcedir/parents" | while read parent; do
+        if ! $(readlink -f $0) "$parent"; then
+            exit
+        fi
+    done
 fi
 
 find "$sourcedir/" | while read source; do
@@ -79,7 +81,7 @@ find "$sourcedir/" | while read source; do
         continue
     fi
 
-    if [ "$file" = "parent" ]; then
+    if [ "$file" = "parents" ]; then
         continue
     fi
 
