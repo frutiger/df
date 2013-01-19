@@ -74,7 +74,7 @@ if [ -e $sourcedir/parents ]; then
     done
 fi
 
-find "$sourcedir/" | while read source; do
+find "$sourcedir/" -type f | while read source; do
     file=${source#$sourcedir/}
 
     if [ -z "$file" ]; then
@@ -98,11 +98,16 @@ find "$sourcedir/" | while read source; do
 
     own "$file"
 
-    if [ -d "$source" ]; then
-        mkdir -p "$target"
-    else
-        mkdir -p $(dirname "$target")
-        cat "$source" >> "$target"
+    targetparent=$(dirname "$target")
+    if ! [ -d $targetparent ]; then
+        if [ -f $targetparent ]; then
+	    echo "Error: $targetparent already exists and is a file"
+	    reset
+            exit -1
+        else
+	    mkdir -p "$targetparent"
+	fi
     fi
+    cat "$source" >> "$target"
 done
 
