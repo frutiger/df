@@ -8,7 +8,7 @@ fi
 dir=$(dirname $0)
 platform=$1
 sourcedir=$dir/$platform
-targetdir=$(readlink -f ~)
+targetdir=$(echo ~)
 datafile=$targetdir/.dotfiles.data
 if [ ! -f $datafile ]; then
     touch $datafile
@@ -68,7 +68,7 @@ fi
 
 if [ -e $sourcedir/parents ]; then
     cat "$sourcedir/parents" | while read parent; do
-        if ! $(readlink -f $0) "$parent"; then
+        if ! $0 "$parent"; then
             exit
         fi
     done
