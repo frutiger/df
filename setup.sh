@@ -74,7 +74,7 @@ if [ -e $sourcedir/parents ]; then
     done
 fi
 
-find "$sourcedir/" -type f | while read source; do
+find "$sourcedir" -type f | while read source; do
     file=${source#$sourcedir/}
 
     if [ -z "$file" ]; then
