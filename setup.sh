@@ -101,12 +101,12 @@ find "$sourcedir/" -type f | while read source; do
     targetparent=$(dirname "$target")
     if ! [ -d $targetparent ]; then
         if [ -f $targetparent ]; then
-	    echo "Error: $targetparent already exists and is a file"
-	    reset
+            echo "Error: $targetparent already exists and is a file"
+            reset
             exit -1
         else
-	    mkdir -p "$targetparent"
-	fi
+            mkdir -p "$targetparent"
+        fi
     fi
     cat "$source" >> "$target"
 done
