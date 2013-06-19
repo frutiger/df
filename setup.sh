@@ -93,6 +93,10 @@ find "$sourcedir" -type f | while read source; do
         continue
     fi
 
+    if [ "$file" = ".git" ]; then
+        continue
+    fi
+
     target="$targetdir/$file"
     if [ -e "$target" ]; then
         if ! is_managed "$file"; then
