@@ -36,12 +36,20 @@ function own() {
     echo "$platform:$1" >> $datafile
 }
 
+function rmemptydir() {
+    if ! [ $(find "$1" -type f -print -quit) ]; then
+        rm -r "$1"
+        rmemptydir $(dirname "$1")
+    fi
+}
+
 function reset() {
     cat $datafile | while read line; do
         file="$(echo $line | cut -d: -f2)"
         target="$targetdir/$file"
         if [ -e "$target" ]; then
             rm -r "$target"
+            rmemptydir $(dirname "$target")
         fi
     done
     rm $datafile
