@@ -17,7 +17,7 @@ done
 dir=$(dirname $0)
 platform=$1
 sourcedir=$dir/$platform
-targetdir=$(echo ~)
+if [ $TARGETDIR ]; then targetdir=$TARGETDIR; else targetdir=$(echo ~); fi
 datafile=$targetdir/.dotfiles.data
 if [ ! -f $datafile ]; then
     touch $datafile
