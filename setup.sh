@@ -24,7 +24,7 @@ if [ ! -f $datafile ]; then
 fi
 
 function is_managed() {
-    grep -q "$1$" $datafile
+    grep -q "^$1$" $datafile
     return $?
 }
 
