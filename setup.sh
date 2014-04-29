@@ -37,8 +37,7 @@ function manage() {
 }
 
 function rmemptydir() {
-    if ! [ $(find "$1" -type f -print -quit) ]; then
-        rm -r "$1"
+    if [ -z $(find "$1/" -type f -print -quit 2>/dev/null) ]; then
         rmemptydir $(dirname "$1")
     fi
 }
