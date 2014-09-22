@@ -56,7 +56,6 @@ def craft_profile(destination, profile):
             if os.path.isfile(target):
                 raise RuntimeError('{} is a file already'.format(target))
             elif not os.path.isdir(target):
-                #print('mkdir {}'.format(target))
                 os.makedirs(target)
 
         for filename in files:
