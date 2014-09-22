@@ -128,8 +128,8 @@ Commands are:
         storage  = os.path.expanduser('~/.dotfiles.git')
         temp_dir = tempfile.mkdtemp()
 
-        for profile in reversed(tsort(profile, get_parents)):
-            craft_profile(temp_dir, profile)
+        for p in reversed(tsort(profile, get_parents)):
+            craft_profile(temp_dir, p)
 
         subprocess.check_call(['git',
                                '--git-dir={}'.format(storage),
@@ -142,7 +142,7 @@ Commands are:
                                'commit',
                                '--allow-empty',
                                '-m',
-                               'update'])
+                               'crafted from ' + profile])
 
         shutil.rmtree(temp_dir)
     elif sys.argv[1] == 'apply':
