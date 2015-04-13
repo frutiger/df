@@ -5,32 +5,33 @@ import subprocess
 import sys
 import tempfile
 
-def traverse(nodes, get_dependencies):
-    result = nodes
-    for node in result:
-        parents = get_dependencies(node)
-        result = result.union(traverse(parents, get_dependencies))
-    return result
+class CyclicGraphError(RuntimeError):
+    def __init__(self, cycle):
+        self.cycle = cycle
 
-def tsort(node, get_dependencies):
-    nodes = traverse({node}, get_dependencies)
-    tsorted = []
-    marks   = {}
+def tsort(nodes, adjacencies, normalize=lambda x: x):
+    visited   = set()
+    postorder = []
 
-    def visit(node):
-        if node not in marks:
-            marks[node] = 'working'
-            for child in get_dependencies(node):
-                visit(child)
-            marks[node] = 'done'
-            tsorted.insert(0, node)
-        elif marks[node] == 'done':
+    def dft(node, stack):
+        if node in visited:
             return
-        else:
-            raise RuntimeError('cyclic graph')
 
-    [visit(n) for n in nodes]
-    return tsorted
+        if node in stack:
+            raise CyclicGraphError(list(stack) + [node])
+
+        stack.append(node)
+        for adjacent in normalize(adjacencies(node)):
+            dft(adjacent, stack)
+        stack.pop()
+
+        visited.add(node)
+        postorder.insert(0, node)
+
+    for node in normalize(nodes):
+        dft(node, [])
+
+    return postorder
 
 def get_parents(profile):
     parent = os.path.join(profile, 'parents')
@@ -127,7 +128,7 @@ Commands are:
         storage  = os.path.expanduser('~/.dotfiles.git')
         temp_dir = tempfile.mkdtemp()
 
-        for p in reversed(tsort(profile, get_parents)):
+        for p in reversed(tsort([profile], get_parents, sorted)):
             craft_profile(temp_dir, p)
 
         subprocess.check_call(['git',
