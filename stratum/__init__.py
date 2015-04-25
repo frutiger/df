@@ -161,6 +161,22 @@ Commands are:
         args = ['git', '--git-dir={}'.format(storage),
                        '--work-tree={}'.format(home)] + sys.argv[2:]
         subprocess.check_call(args)
+    elif sys.argv[1] == 'graph':
+        print('digraph Profiles {')
+
+        for profile in os.listdir():
+            if not os.path.isdir(profile):
+                continue
+
+            parents = os.path.join(profile, 'parents')
+            if not os.path.isfile(parents):
+                continue
+
+            with open(parents) as parents:
+                for parent in parents:
+                    print('  "{}" -> "{}"'.format(profile, parent[:-1]))
+
+        print('}')
     else:
         print_usage()
         sys.exit(-1)
