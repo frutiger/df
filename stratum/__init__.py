@@ -164,7 +164,7 @@ Commands are:
     elif sys.argv[1] == 'graph':
         print('digraph Profiles {')
 
-        for profile in os.listdir():
+        for profile in os.listdir('.'):
             if not os.path.isdir(profile):
                 continue
 
