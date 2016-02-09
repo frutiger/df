@@ -112,7 +112,8 @@ Commands are:
    init   initialize a storage area in the default location
    craft  craft a profile and commit it to the default location
    apply  apply the HEAD of the storage to the default location
-   git    run the args as a git command with the default locations'''\
+   git    run the args as a git command with the default locations
+   graph  produce a graph of the profiles in 'dot' format'''\
 .format(sys.argv[0]))
 
     if len(sys.argv) < 2:
@@ -168,13 +169,8 @@ Commands are:
             if not os.path.isdir(profile):
                 continue
 
-            parents = os.path.join(profile, 'parents')
-            if not os.path.isfile(parents):
-                continue
-
-            with open(parents) as parents:
-                for parent in parents:
-                    print('  "{}" -> "{}"'.format(profile, parent[:-1]))
+            for parent in get_parents(profile):
+                print('  "{}" -> "{}"'.format(profile, parent))
 
         print('}')
     else:
