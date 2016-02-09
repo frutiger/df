@@ -34,7 +34,7 @@ def tsort(nodes, adjacencies, normalize=lambda x: x):
     return postorder
 
 def get_parents(profile):
-    parent = os.path.join(profile, 'parents')
+    parent = profile + '.parents'
     if os.path.isfile(parent):
         with open(parent) as f:
             return set(line[:-1] for line in f.readlines())
@@ -61,9 +61,6 @@ def craft_profile(destination, profile):
 
         for filename in files:
             if filename == '.git':
-                continue
-
-            if path == '' and filename == 'parents':
                 continue
 
             source = os.path.join(source_path, filename)
