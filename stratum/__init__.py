@@ -126,8 +126,13 @@ Commands are:
         storage  = os.path.expanduser('~/.dotfiles.git')
         temp_dir = tempfile.mkdtemp()
 
-        for p in reversed(tsort([profile], get_parents, sorted)):
+        profiles = tsort([profile], get_parents, sorted)
+        for p in reversed(profiles):
             craft_profile(temp_dir, p)
+        for p in profiles:
+            end_profile = f'{p}.end'
+            if os.path.exists(end_profile):
+                craft_profile(temp_dir, end_profile)
 
         subprocess.check_call(['git',
                                '--git-dir={}'.format(storage),
