@@ -171,8 +171,15 @@ Commands are:
             if not os.path.isdir(profile):
                 continue
 
+            if profile.startswith('.'):
+                continue
+
+            if profile.endswith('.end'):
+                continue
+
+            print(f'  "{profile}"')
             for parent in get_parents(profile):
-                print('  "{}" -> "{}"'.format(profile, parent))
+                print(f'  "{profile}" -> "{parent}"')
 
         print('}')
     else:
