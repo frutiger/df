@@ -84,22 +84,6 @@ def init_storage(path):
                            '--git-dir={}'.format(path),
                            'init',
                            '--bare'])
-    empty_tree = subprocess.check_output(['git',
-                                          'hash-object',
-                                          '-t',
-                                          'tree',
-                                          '/dev/null'])[:-1]
-    genesis = subprocess.check_output(['git',
-                                       '--git-dir={}'.format(path),
-                                       'commit-tree',
-                                       '-m',
-                                       'genesis',
-                                        empty_tree])[:-1]
-    subprocess.check_call(['git',
-                           '--git-dir={}'.format(path),
-                           'update-ref',
-                           'HEAD',
-                            genesis])
 
 def main():
     def print_usage():
@@ -142,6 +126,8 @@ Commands are:
         subprocess.check_call(['git',
                                '--git-dir={}'.format(storage),
                                '--work-tree={}'.format(temp_dir),
+                               '-c', 'user.name=stratum',
+                               '-c', 'user.email=stratum@localhost',
                                'commit',
                                '--allow-empty',
                                '-m',
