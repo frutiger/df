@@ -153,8 +153,13 @@ Commands are:
     elif sys.argv[1] == 'graph':
         print('digraph Profiles {')
 
-        for profile in os.listdir('.'):
-            if not os.path.isdir(profile):
+        profiles = set(os.listdir('.'))
+        for profile in profiles:
+            if profile.endswith('.parents'):
+                profile = profile[:-1 * len('.parents')]
+                if profile in profiles:
+                    continue
+            elif not os.path.isdir(profile):
                 continue
 
             if profile.startswith('.'):
