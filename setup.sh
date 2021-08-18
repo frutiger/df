@@ -1,9 +1,18 @@
 #!/bin/bash
 
 if [[ $# < 1 ]]; then
-    echo "Usage: $0 [ <platform> | reset ]"
+    echo "Usage: $0 -c [ <platform> | reset ]"
+    echo "   -c: This is a child run (do not reset)"
     exit
 fi
+
+childrun=0
+while getopts "c" option; do
+    case $option in
+        c) childrun=1
+           shift ;;
+    esac
+done
 
 dir=$(dirname $0)
 platform=$1
@@ -15,25 +24,16 @@ if [ ! -f $datafile ]; then
 fi
 
 function is_managed() {
-    grep -q ":$1$" $datafile
+    grep -q "$1$" $datafile
     return $?
 }
 
-function is_owned() {
-    grep -q "$platform:$1$" $datafile
-    return $?
-}
-
-function own() {
-    if is_owned $1; then
-        return
-    fi
-
+function manage() {
     if is_managed $1; then
         return
     fi
 
-    echo "$platform:$1" >> $datafile
+    echo "$1" >> $datafile
 }
 
 function rmemptydir() {
@@ -44,8 +44,7 @@ function rmemptydir() {
 }
 
 function reset() {
-    cat $datafile | while read line; do
-        file="$(echo $line | cut -d: -f2)"
+    cat $datafile | while read file; do
         target="$targetdir/$file"
         if [ -e "$target" ]; then
             rm -r "$target"
@@ -58,6 +57,10 @@ function reset() {
 if [ $1 = "reset" ]; then
     reset
     exit
+fi
+
+if [ $childrun == 0 ]; then
+    reset
 fi
 
 if [ ! -d $sourcedir ]; then
@@ -76,7 +79,7 @@ fi
 
 if [ -e $sourcedir/parents ]; then
     cat "$sourcedir/parents" | while read parent; do
-        if ! $0 "$parent"; then
+        if ! $0 -c "$parent"; then
             exit
         fi
     done
@@ -103,12 +106,10 @@ find "$sourcedir" -type f | while read source; do
             echo "Error: $target is unmanaged and already exists"
             reset
             exit -1
-        elif is_owned "$file"; then
-            rm -r "$target"
         fi
     fi
 
-    own "$file"
+    manage "$file"
 
     targetparent=$(dirname "$target")
     if ! [ -d $targetparent ]; then
