@@ -9,9 +9,9 @@ class CyclicGraphError(RuntimeError):
     def __init__(self, cycle):
         self.cycle = cycle
 
-def tsort(nodes, adjacencies, normalize=lambda x: x):
-    visited   = set()
-    postorder = []
+def postorder(node, get_adjacents):
+    visited = set()
+    result  = []
 
     def dft(node, stack):
         if node in visited:
@@ -21,32 +21,35 @@ def tsort(nodes, adjacencies, normalize=lambda x: x):
             raise CyclicGraphError(list(stack) + [node])
 
         stack.append(node)
-        for adjacent in normalize(adjacencies(node)):
+        for adjacent in get_adjacents(node):
             dft(adjacent, stack)
         stack.pop()
 
         visited.add(node)
-        postorder.insert(0, node)
+        result.append(node)
 
-    for node in normalize(nodes):
-        dft(node, [])
+    dft(node, [])
 
-    return postorder
+    return result
 
 def get_parents(profile):
-    parent = profile + '.parents'
+    parent = os.path.join(profile, 'parents')
     if os.path.isfile(parent):
         with open(parent) as f:
-            return set(line[:-1] for line in f.readlines())
+            return [line[:-1] for line in f.readlines()]
     else:
-        return set()
+        return []
 
-def craft_profile(destination, profile):
-    for root, dirs, files in os.walk(profile):
+def craft_profile(destination, profile, order):
+    source = os.path.join(profile, order)
+    if not os.path.isdir(source):
+        return
+
+    for root, dirs, files in os.walk(source):
         sep = os.path.sep
 
         source_path = root
-        path        = sep.join(root.split(sep)[1:])
+        path        = sep.join(root.split(sep)[2:])
         target_path = os.path.join(destination, path)
 
         for directory in dirs:
@@ -110,13 +113,11 @@ Commands are:
         storage  = os.path.expanduser('~/.dotfiles.git')
         temp_dir = tempfile.mkdtemp()
 
-        profiles = tsort([profile], get_parents, sorted)
-        for p in reversed(profiles):
-            craft_profile(temp_dir, p)
+        profiles = postorder(profile, get_parents)
         for p in profiles:
-            end_profile = f'{p}.end'
-            if os.path.exists(end_profile):
-                craft_profile(temp_dir, end_profile)
+            craft_profile(temp_dir, p, 'up')
+        for p in reversed(profiles):
+            craft_profile(temp_dir, p, 'down')
 
         subprocess.check_call(['git',
                                '--git-dir={}'.format(storage),
@@ -153,19 +154,8 @@ Commands are:
     elif sys.argv[1] == 'graph':
         print('digraph Profiles {')
 
-        profiles = set(os.listdir('.'))
-        for profile in profiles:
-            if profile.endswith('.parents'):
-                profile = profile[:-1 * len('.parents')]
-                if profile in profiles:
-                    continue
-            elif not os.path.isdir(profile):
-                continue
-
-            if profile.startswith('.'):
-                continue
-
-            if profile.endswith('.end'):
+        for profile in os.listdir('.'):
+            if not os.path.isdir(profile) or profile == '.git':
                 continue
 
             print(f'  "{profile}"')
