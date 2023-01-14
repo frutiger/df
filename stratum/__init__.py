@@ -109,6 +109,8 @@ Commands are:
         init_storage(storage)
     elif sys.argv[1] == 'craft':
         profile = sys.argv[2]
+        if not os.path.isdir(profile):
+            raise RuntimeError(f'{profile} does not exist')
 
         storage  = os.path.expanduser('~/.dotfiles.git')
         temp_dir = tempfile.mkdtemp()
