@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='stratum',
-      version='0.5.1',
+      version='0.5.2',
       description='Manage layered dotfiles',
       url='https://github.com/frutiger/stratum',
       author='Masud Rahman',

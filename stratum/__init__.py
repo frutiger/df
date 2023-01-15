@@ -116,10 +116,10 @@ Commands are:
         temp_dir = tempfile.mkdtemp()
 
         profiles = postorder(profile, get_parents)
-        for p in profiles:
-            craft_profile(temp_dir, p, 'up')
         for p in reversed(profiles):
             craft_profile(temp_dir, p, 'down')
+        for p in profiles:
+            craft_profile(temp_dir, p, 'up')
 
         subprocess.check_call(['git',
                                '--git-dir={}'.format(storage),
