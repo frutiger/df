@@ -75,6 +75,7 @@ def craft_profile(destination, profile, order):
                      open(target, 'ab') as target_file:
                     for line in source_file:
                         target_file.write(line)
+            os.chmod(target, os.stat(source).st_mode)
 
 def init_storage(path):
     if os.path.isdir(path):
